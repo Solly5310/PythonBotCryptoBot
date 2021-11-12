@@ -1,2 +1,2 @@
 # PythonBotCryptoBot
-Personal Bot project
+Personal Bot Project
