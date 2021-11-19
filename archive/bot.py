@@ -99,3 +99,6 @@ ws.run_forever()
 # Average Directional Index
 # Moving Average Convergence Divergence (You also have the simplte moving average)
 # RSA
+
+
+yes
