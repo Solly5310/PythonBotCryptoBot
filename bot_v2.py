@@ -39,7 +39,6 @@ def get_price_data(c_symbol, switch):
       #we then convert the timetsamp into a date
       date = datetime.fromtimestamp(int(candles[-1][0])/1000.0)
       print(date)
-      print(MAST[-1],'   ', MALT[-1], switch)
       if MAST[-1] > MALT[-1] and switch == 0:
          print("Buy Buy Buy")
          record_result(date, closes_np[-1], MAST[-1], MALT[-1], "Buy Order Placed")
