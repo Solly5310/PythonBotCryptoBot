@@ -39,6 +39,7 @@ def get_price_data(c_symbol, switch):
       #we then convert the timetsamp into a date
       date = datetime.fromtimestamp(int(candles[-1][0])/1000.0)
       print(date)
+      print(MAST[-1],'   ', MALT[-1], switch)
       if MAST[-1] > MALT[-1] and switch == 0:
          print("Buy Buy Buy")
          record_result(date, closes_np[-1], MAST[-1], MALT[-1], "Buy Order Placed")
@@ -46,13 +47,15 @@ def get_price_data(c_symbol, switch):
       elif (MAST[-1] > MALT[-1] and switch == 1):
          print("Already bought")
          record_result(date, closes_np[-1], MAST[-1], MALT[-1], "N/A")
+         return 1
       elif MAST[-1] < MALT[-1] and switch ==1:
-         print("sell sell sell")
+         print("Sell Sell Sell")
          record_result(date, closes_np[-1], MAST[-1], MALT[-1], "Sell Order Placed")
          return 0
       elif (MAST[-1] < MALT[-1] and switch == 0):
          print("Already sold")
          record_result(date, closes_np[-1], MAST[-1], MALT[-1], "N\A")
+         return 0
 
 #this program will run every 30 mins
 while True:
