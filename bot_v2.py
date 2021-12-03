@@ -88,4 +88,3 @@ while True:
    #here is where we analyse the data
    buy_switch = get_price_data(crypto_symbol, buy_switch)
    time.sleep(1800)
-   time.sleep(1800)
