@@ -14,15 +14,23 @@ client = Client(key.API_KEY, key.API_SECRET)
 
 buy_switch = 0
 order_history = []
-#set the column headings for our csv file
+#set the column headings for our csv files
 df = pd.DataFrame(columns=['Date-Time', 'Price', 'Short Moving Average', 'Long Moving Average', 'Action'])
-df.to_csv('test.csv',index=False)
+df.to_csv('activitylog.csv',index=False)
 
-#used to record decisions made by the bot
+df2 = pd.DataFrame(columns=['Date-Time', 'Price', 'Commission','Buy/Sell'])
+df2.to_csv('orderbook.csv',index=False)
+
+#used to record decisions made by the bot each half hour
 def record_result(date, closing_price, short_ma, long_ma, action):
    df = pd.DataFrame( { 'Date-Time': [date], 'Price': [closing_price], 'Short Moving Average': [short_ma], 'Long Moving Average': [long_ma],'Action': [action] })
-   df.to_csv('test.csv', mode='a', index=False, header=False)
-   
+   df.to_csv('activitylog.csv', mode='a', index=False, header=False)
+
+#used to record any orders placed by the bot
+def record_order(date, price, commission, buySell):
+   df = pd.DataFrame( { 'Date-Time': [date], 'Price': [price], 'Commission': [commission], 'Buy/Sell': [buySell]})
+   df.to_csv('orderbook.csv', mode='a', index=False, header=False)
+
 #finds the price data at 30 min intervals
 #will then make a decision as to where to trade and record it
 def get_price_data(c_symbol, switch):
@@ -42,15 +50,34 @@ def get_price_data(c_symbol, switch):
       if MAST[-1] > MALT[-1] and switch == 0:
          print("Buy Buy Buy")
          record_result(date, closes_np[-1], MAST[-1], MALT[-1], "Buy Order Placed")
+         #buy order made to Binance API
+         order = client.order_market_buy(symbol=crypto_symbol,quantity=TRADE_QUANTITY)
+         #recording order in CSV
+         transactionTime = order['transactTime']
+         transactionTime = datetime.fromtimestamp(int(transactionTime)/1000.0)
+         orderPrice = order['fills'][0]['price']
+         orderCommission = order['fills'][0]['commission']
+         record_order(transactionTime,orderPrice,orderCommission, 'Buy')
          return 1
+
       elif (MAST[-1] > MALT[-1] and switch == 1):
          print("Already bought")
          record_result(date, closes_np[-1], MAST[-1], MALT[-1], "N/A")
          return 1
+
       elif MAST[-1] < MALT[-1] and switch ==1:
          print("Sell Sell Sell")
          record_result(date, closes_np[-1], MAST[-1], MALT[-1], "Sell Order Placed")
+         #sell order made to Binance API
+         order = client.order_market_sell(symbol=crypto_symbol,quantity=TRADE_QUANTITY)
+         #recording order in CSV
+         transactionTime = order['transactTime']
+         transactionTime = datetime.fromtimestamp(int(transactionTime)/1000.0)
+         orderPrice = order['fills'][0]['price']
+         orderCommission = order['fills'][0]['commission']
+         record_order(transactionTime,orderPrice,orderCommission, 'Sell')
          return 0
+
       elif (MAST[-1] < MALT[-1] and switch == 0):
          print("Already sold")
          record_result(date, closes_np[-1], MAST[-1], MALT[-1], "N\A")
@@ -60,4 +87,5 @@ def get_price_data(c_symbol, switch):
 while True:
    #here is where we analyse the data
    buy_switch = get_price_data(crypto_symbol, buy_switch)
+   time.sleep(1800)
    time.sleep(1800)
